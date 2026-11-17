@@ -1,0 +1,1 @@
+{"background_color":"#eef1f4","description":"指定したICで乗り降りするルート候補を、全て計算して選べるナビ（最小版）。","display":"standalone","icons":[{"purpose":"any","sizes":"192x192","src":"icon-192.png","type":"image/png"},{"purpose":"any","sizes":"512x512","src":"icon-512.png","type":"image/png"}],"name":"Gatevia","scope":"./","short_name":"Gatevia","start_url":"./index.html","theme_color":"#14181d"}

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gatevia</title>
+<meta name="description" content="指定したICで乗り降りするルート候補を、全て計算して選べるナビ。最小版。">
+<meta name="theme-color" content="#14181d">
+<meta name="apple-mobile-web-app-title" content="Gatevia">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="vendor/leaflet.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div id="view-navi" class="view">
+  <div id="map"></div>
+
+  <div id="search-panel" class="card">
+    <div class="field-row">
+      <span class="field-label from">出発地</span>
+      <input id="origin-input" type="text" placeholder="地名・住所で検索" autocomplete="off">
+      <button id="origin-search" class="mini-btn" type="button">検索</button>
+      <button id="origin-gps" class="mini-btn" type="button" title="現在地を出発地にする">現在地</button>
+    </div>
+    <div class="field-row">
+      <span class="field-label to">目的地</span>
+      <input id="dest-input" type="text" placeholder="地名・住所で検索" autocomplete="off">
+      <button id="dest-search" class="mini-btn" type="button">検索</button>
+    </div>
+    <div id="geo-results" class="geo-results" hidden></div>
+    <div class="action-row">
+      <div class="tap-toggle" role="group" aria-label="地図タップで指定する対象">
+        <span class="tap-toggle-label">地図タップ:</span>
+        <button id="tap-origin" class="toggle-btn active" type="button">出発地</button>
+        <button id="tap-dest" class="toggle-btn" type="button">目的地</button>
+      </div>
+      <button id="route-btn" class="primary-btn" type="button">ルート検索</button>
+    </div>
+    <div id="point-status" class="point-status">出発地・目的地は、検索か地図タップで指定してください。</div>
+  </div>
+
+  <button id="locate-btn" class="locate-btn" type="button" title="現在地を表示">◎</button>
+
+  <div id="progress-panel" class="card sheet" hidden>
+    <div class="progress-title">候補を計算しています… <span id="progress-elapsed">0秒</span></div>
+    <div class="progress-note">指定ICで強制的に通るルートを候補ごとに計算しています。候補の多い区間では数分かかることがあります。</div>
+    <button id="cancel-btn" class="mini-btn" type="button">キャンセル</button>
+  </div>
+
+  <div id="result-panel" class="card sheet" hidden>
+    <div class="result-head">
+      <span id="result-summary"></span>
+      <button id="result-close" class="mini-btn" type="button">閉じる</button>
+    </div>
+    <div id="selected-summary" class="selected-summary" hidden></div>
+    <div id="candidate-list" class="candidate-list"></div>
+  </div>
+
+  <div id="error-panel" class="card sheet error" hidden>
+    <div id="error-text"></div>
+    <button id="error-close" class="mini-btn" type="button">閉じる</button>
+  </div>
+</div>
+
+<div id="view-myroute" class="view placeholder" hidden>
+  <div class="placeholder-inner">
+    <h1>マイルート</h1>
+    <p>準備中です。保存したルートやドライブプリセットは、今後の版でここに入ります。</p>
+  </div>
+</div>
+
+<div id="view-settings" class="view placeholder" hidden>
+  <div class="placeholder-inner">
+    <h1>設定</h1>
+    <p>準備中です。</p>
+    <dl class="info-list">
+      <dt>アプリ</dt><dd>Gatevia（最小版）</dd>
+      <dt>ルーティング</dt><dd>指定IC強制ルーティング（稼働中サービス）</dd>
+      <dt>サービスURL</dt><dd class="mono">https://sedate-landmark-shrunk.ngrok-free.dev</dd>
+    </dl>
+  </div>
+</div>
+
+<nav id="tabbar">
+  <button class="tab active" data-view="view-navi" type="button">ナビ</button>
+  <button class="tab" data-view="view-myroute" type="button">マイルート</button>
+  <button class="tab" data-view="view-settings" type="button">設定</button>
+</nav>
+
+<script src="vendor/leaflet.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
