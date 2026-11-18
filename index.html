@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Gatevia</title>
-<meta name="description" content="指定したICで乗り降りするルート候補を、全て計算して選べるナビ。最小版。">
-<meta name="theme-color" content="#14181d">
-<meta name="apple-mobile-web-app-title" content="Gatevia">
+<title>Gatevia 2</title>
+<meta name="description" content="乗るIC・降りるICを順に選んで、指定したICを通るルートを表示するナビ。Gatevia 2（ローカル版）。">
+<meta name="theme-color" content="#0b0e14">
+<meta name="apple-mobile-web-app-title" content="Gatevia 2">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -17,48 +17,57 @@
 <div id="view-navi" class="view">
   <div id="map"></div>
 
-  <div id="search-panel" class="card">
-    <div class="field-row">
-      <span class="field-label from">出発地</span>
-      <input id="origin-input" type="text" placeholder="地名・住所で検索" autocomplete="off">
-      <button id="origin-search" class="mini-btn" type="button">検索</button>
-      <button id="origin-gps" class="mini-btn" type="button" title="現在地を出発地にする">現在地</button>
+  <!-- 上部: 単一検索バー + クイックチップ（カーナビ1の構成） -->
+  <div id="topbar" class="glass">
+    <div class="search-row">
+      <input id="search-input" type="text" placeholder="目的地を検索" autocomplete="off">
+      <button id="search-go" class="search-btn" type="button">検索</button>
     </div>
-    <div class="field-row">
-      <span class="field-label to">目的地</span>
-      <input id="dest-input" type="text" placeholder="地名・住所で検索" autocomplete="off">
-      <button id="dest-search" class="mini-btn" type="button">検索</button>
+    <div id="chips" class="chips">
+      <button class="chip" data-chip="home" type="button">自宅</button>
+      <button class="chip" data-chip="レストラン" type="button">レストラン</button>
+      <button class="chip" data-chip="コンビニ" type="button">コンビニ</button>
+      <button class="chip" data-chip="ショッピング" type="button">ショッピング</button>
+      <button class="chip" data-chip="ガソリンスタンド" type="button">ガソリンスタンド</button>
+      <button class="chip" data-chip="駐車場" type="button">駐車場</button>
     </div>
     <div id="geo-results" class="geo-results" hidden></div>
+  </div>
+
+  <button id="locate-btn" class="glass" type="button" title="現在地を表示">◎</button>
+  <button id="sheet-open-btn" class="glass" type="button" hidden>ルート設定</button>
+
+  <!-- ルート設定シート: 出発地/目的地 + IC選択フロー + 一般道 -->
+  <div id="route-sheet" class="glass sheet" hidden>
+    <div class="sheet-head">
+      <span class="sheet-title">ルート</span>
+      <button id="sheet-close" class="mini-btn" type="button">閉じる</button>
+    </div>
+    <div class="od-row">
+      <span class="od-dot from"></span>
+      <button id="origin-row" class="od-value" type="button">現在地</button>
+      <button id="origin-gps" class="mini-btn" type="button">現在地</button>
+    </div>
+    <div class="od-row">
+      <span class="od-dot to"></span>
+      <button id="dest-row" class="od-value" type="button">目的地を指定</button>
+      <button id="swap-btn" class="mini-btn" type="button" title="出発地と目的地を入れ替え">⇅</button>
+    </div>
+    <div class="tap-toggle" role="group" aria-label="地図タップで指定する対象">
+      <span class="tap-toggle-label">地図タップで指定:</span>
+      <button id="tap-origin" class="toggle-btn" type="button">出発地</button>
+      <button id="tap-dest" class="toggle-btn active" type="button">目的地</button>
+    </div>
     <div class="action-row">
-      <div class="tap-toggle" role="group" aria-label="地図タップで指定する対象">
-        <span class="tap-toggle-label">地図タップ:</span>
-        <button id="tap-origin" class="toggle-btn active" type="button">出発地</button>
-        <button id="tap-dest" class="toggle-btn" type="button">目的地</button>
-      </div>
-      <button id="route-btn" class="primary-btn" type="button">ルート検索</button>
+      <button id="ic-flow-btn" class="primary-btn" type="button">ICを選んで検索</button>
+      <button id="surface-btn" class="sub-btn" type="button">一般道ルート</button>
     </div>
-    <div id="point-status" class="point-status">出発地・目的地は、検索か地図タップで指定してください。</div>
-  </div>
-
-  <button id="locate-btn" class="locate-btn" type="button" title="現在地を表示">◎</button>
-
-  <div id="progress-panel" class="card sheet" hidden>
-    <div class="progress-title">候補を計算しています… <span id="progress-elapsed">0秒</span></div>
-    <div class="progress-note">指定ICで強制的に通るルートを候補ごとに計算しています。候補の多い区間では数分かかることがあります。</div>
-    <button id="cancel-btn" class="mini-btn" type="button">キャンセル</button>
-  </div>
-
-  <div id="result-panel" class="card sheet" hidden>
-    <div class="result-head">
-      <span id="result-summary"></span>
-      <button id="result-close" class="mini-btn" type="button">閉じる</button>
+    <div id="flow-area" class="flow-area">
+      <div class="flow-hint">出発地と目的地を指定して、「ICを選んで検索」を押してください。乗るIC → 降りるICの順に選びます。</div>
     </div>
-    <div id="selected-summary" class="selected-summary" hidden></div>
-    <div id="candidate-list" class="candidate-list"></div>
   </div>
 
-  <div id="error-panel" class="card sheet error" hidden>
+  <div id="error-panel" class="glass sheet error" hidden>
     <div id="error-text"></div>
     <button id="error-close" class="mini-btn" type="button">閉じる</button>
   </div>
@@ -74,16 +83,21 @@
 <div id="view-settings" class="view placeholder" hidden>
   <div class="placeholder-inner">
     <h1>設定</h1>
-    <p>準備中です。</p>
     <dl class="info-list">
-      <dt>アプリ</dt><dd>Gatevia（最小版）</dd>
-      <dt>ルーティング</dt><dd>指定IC強制ルーティング（稼働中サービス）</dd>
-      <dt>サービスURL</dt><dd class="mono">https://sedate-landmark-shrunk.ngrok-free.dev</dd>
+      <dt>アプリ</dt><dd>Gatevia 2（ローカル版。本家の Gatevia とは別に開発中の版です）</dd>
+      <dt>ルーティング</dt><dd>指定IC強制ルーティング（IC選択フローは B3 形式のサービスが対象）</dd>
+      <dt>施設辞書</dt><dd id="dict-status">未配置（地名検索のみで動作します）</dd>
     </dl>
+    <div class="setting-block">
+      <label for="service-url">サービスURL</label>
+      <input id="service-url" type="text" autocomplete="off">
+      <button id="service-url-save" class="mini-btn" type="button">保存</button>
+      <p class="setting-note">空欄で保存すると既定のURLに戻ります。変更は次回の検索から反映されます。</p>
+    </div>
   </div>
 </div>
 
-<nav id="tabbar">
+<nav id="tabbar" class="glass-bar">
   <button class="tab active" data-view="view-navi" type="button">ナビ</button>
   <button class="tab" data-view="view-myroute" type="button">マイルート</button>
   <button class="tab" data-view="view-settings" type="button">設定</button>

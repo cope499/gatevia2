@@ -1,133 +1,214 @@
+/* Gatevia 2: カーナビ1の構成（全画面地図 + 単一検索バー + クイックチップ +
+   右下現在地ボタン + 下部タブバー）に、ダークなガラス質感の見た目を寄せた版。 */
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html, body { margin: 0; padding: 0; height: 100%; }
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans",
     "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
-  color: #1c2430; background: #eef1f4; overflow: hidden;
+  color: #f2f5f9; background: #0b0e14; overflow: hidden;
 }
 .view { position: fixed; inset: 0; bottom: 56px; }
-#map { position: absolute; inset: 0; }
+#map { position: absolute; inset: 0; background: #0b0e14; }
 
-.card {
-  background: rgba(255,255,255,.96);
-  border-radius: 14px;
-  box-shadow: 0 4px 18px rgba(10,20,40,.22);
+.glass {
+  background: rgba(13, 17, 26, .78);
+  -webkit-backdrop-filter: blur(12px) saturate(1.25);
+  backdrop-filter: blur(12px) saturate(1.25);
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-radius: 16px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .38);
+  color: #f2f5f9;
 }
 
-#search-panel {
+/* ---------- 上部: 検索バー + チップ ---------- */
+#topbar {
   position: absolute; top: calc(10px + env(safe-area-inset-top));
-  left: 10px; right: 10px; z-index: 1000; padding: 10px 12px;
+  left: 10px; right: 10px; z-index: 1000; padding: 10px 12px 8px;
 }
-.field-row { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
-.field-label {
-  flex: 0 0 52px; font-size: 12px; font-weight: 700; text-align: center;
-  padding: 4px 0; border-radius: 8px; color: #fff;
+.search-row { display: flex; align-items: center; gap: 8px; }
+#search-input {
+  flex: 1 1 auto; min-width: 0; font-size: 16px; padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, .16); border-radius: 11px;
+  background: rgba(255, 255, 255, .09); color: #f2f5f9; outline: none;
 }
-.field-label.from { background: #2e7d4f; }
-.field-label.to { background: #c0392b; }
-.field-row input {
-  flex: 1 1 auto; min-width: 0; font-size: 15px; padding: 8px 10px;
-  border: 1px solid #c9d2dc; border-radius: 9px; background: #fff;
+#search-input::placeholder { color: #8fa1b5; }
+#search-input:focus { border-color: #58a6ff; }
+.search-btn {
+  flex: 0 0 auto; font-size: 14px; font-weight: 700; padding: 10px 14px;
+  border: none; border-radius: 11px; background: #1f6feb; color: #fff;
 }
-.mini-btn {
-  flex: 0 0 auto; font-size: 13px; padding: 8px 10px; border-radius: 9px;
-  border: 1px solid #c9d2dc; background: #f4f7fa; color: #1c2430;
+.search-btn:active { background: #1a5fd0; }
+.chips {
+  display: flex; gap: 6px; margin-top: 9px; overflow-x: auto;
+  -webkit-overflow-scrolling: touch; scrollbar-width: none;
 }
-.mini-btn:active { background: #e2e9f0; }
+.chips::-webkit-scrollbar { display: none; }
+.chip {
+  flex: 0 0 auto; font-size: 13px; padding: 6px 12px; border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .18); background: rgba(255, 255, 255, .07);
+  color: #dbe6f2;
+}
+.chip:active { background: rgba(88, 166, 255, .28); }
 .geo-results {
-  max-height: 180px; overflow-y: auto; border-top: 1px solid #e3e9ef;
-  margin: 2px -12px 6px; padding: 4px 12px;
+  max-height: 220px; overflow-y: auto; margin-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, .12); padding-top: 4px;
 }
-.geo-item { padding: 9px 4px; font-size: 14px; border-bottom: 1px solid #eef2f6; }
+.geo-item { padding: 9px 4px; font-size: 14px; border-bottom: 1px solid rgba(255, 255, 255, .07); }
 .geo-item:last-child { border-bottom: none; }
-.geo-item small { display: block; color: #68727f; font-size: 11px; margin-top: 2px; }
-.action-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.tap-toggle { display: flex; align-items: center; gap: 4px; }
-.tap-toggle-label { font-size: 12px; color: #68727f; }
-.toggle-btn {
-  font-size: 13px; padding: 7px 10px; border-radius: 999px;
-  border: 1px solid #c9d2dc; background: #fff; color: #43505e;
-}
-.toggle-btn.active { background: #14181d; color: #fff; border-color: #14181d; }
-.primary-btn {
-  font-size: 15px; font-weight: 700; padding: 10px 18px; border: none;
-  border-radius: 10px; background: #1f6feb; color: #fff;
-}
-.primary-btn:disabled { background: #9db8dd; }
-.point-status { margin-top: 8px; font-size: 12px; color: #68727f; line-height: 1.5; }
-
-.locate-btn {
-  position: absolute; right: 12px; bottom: 18px; z-index: 1000;
-  width: 46px; height: 46px; border-radius: 50%; border: none;
-  background: rgba(255,255,255,.96); box-shadow: 0 3px 12px rgba(10,20,40,.28);
-  font-size: 22px; color: #1f6feb; line-height: 1;
-}
-
-.sheet {
-  position: absolute; left: 10px; right: 10px; bottom: 10px; z-index: 1100;
-  padding: 12px; max-height: 52%; display: flex; flex-direction: column;
-}
-.progress-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
-.progress-note { font-size: 12px; color: #68727f; line-height: 1.6; margin-bottom: 10px; }
-.result-head {
-  display: flex; align-items: center; justify-content: space-between;
-  font-size: 14px; font-weight: 700; margin-bottom: 8px;
-}
-.selected-summary {
-  font-size: 13px; line-height: 1.6; background: #eef4fd; border-radius: 9px;
-  padding: 8px 10px; margin-bottom: 8px;
-}
-.candidate-list { overflow-y: auto; -webkit-overflow-scrolling: touch; }
-.group-head {
-  font-size: 12px; font-weight: 700; color: #43505e; background: #eef1f4;
-  border-radius: 7px; padding: 5px 9px; margin: 8px 0 6px;
-}
-.candidate {
-  border: 1px solid #dde4ec; border-radius: 11px; padding: 9px 11px;
-  margin-bottom: 8px; background: #fff;
-}
-.candidate.selected { border-color: #1f6feb; background: #f2f7ff; }
-.cand-main { display: flex; align-items: baseline; gap: 8px; }
-.cand-rank { font-size: 12px; font-weight: 700; color: #1f6feb; flex: 0 0 auto; }
-.cand-ics { flex: 1 1 auto; font-size: 15px; font-weight: 600; line-height: 1.45; }
-.cand-ics small { display: block; font-size: 11px; font-weight: 400; color: #68727f; }
-.cand-time { flex: 0 0 auto; text-align: right; }
-.cand-time .t { font-size: 16px; font-weight: 700; }
-.cand-time .d { font-size: 12px; color: #68727f; }
-.cand-roads { font-size: 12px; color: #43505e; margin-top: 5px; line-height: 1.5; }
-.badge-caution {
-  display: inline-block; font-size: 11px; font-weight: 700; color: #8a5a00;
-  background: #ffe9b8; border-radius: 6px; padding: 1px 6px; margin-left: 6px;
+.geo-item small { display: block; color: #8fa1b5; font-size: 11px; margin-top: 2px; }
+.geo-item .tag {
+  display: inline-block; font-size: 10px; font-weight: 700; color: #0b0e14;
+  background: #ffd479; border-radius: 5px; padding: 0 5px; margin-right: 6px;
   vertical-align: 2px;
 }
-.sheet.error { background: #fdf0ef; color: #7c211a; font-size: 14px; line-height: 1.6; }
+.geo-note { padding: 9px 4px; font-size: 13px; color: #c8d6e5; line-height: 1.6; }
+
+/* ---------- 現在地 / シート再表示ボタン ---------- */
+#locate-btn {
+  position: absolute; right: 12px; bottom: 18px; z-index: 1200;
+  width: 48px; height: 48px; border-radius: 50%;
+  font-size: 23px; color: #58a6ff; line-height: 1; padding: 0;
+}
+#sheet-open-btn {
+  position: absolute; left: 12px; bottom: 18px; z-index: 1200;
+  font-size: 14px; font-weight: 700; padding: 11px 16px; border-radius: 999px;
+}
+
+/* ---------- ルートシート ---------- */
+.sheet {
+  position: absolute; left: 10px; right: 10px; bottom: 10px; z-index: 1100;
+  padding: 12px; max-height: 60%; display: flex; flex-direction: column;
+}
+.sheet-head {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
+}
+.sheet-title { font-size: 15px; font-weight: 700; }
+.mini-btn {
+  flex: 0 0 auto; font-size: 13px; padding: 7px 11px; border-radius: 9px;
+  border: 1px solid rgba(255, 255, 255, .18); background: rgba(255, 255, 255, .08);
+  color: #dbe6f2;
+}
+.mini-btn:active { background: rgba(255, 255, 255, .18); }
+.od-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+.od-dot { flex: 0 0 auto; width: 11px; height: 11px; border-radius: 50%; border: 2px solid #fff; }
+.od-dot.from { background: #3fb96f; }
+.od-dot.to { background: #e5534b; }
+.od-value {
+  flex: 1 1 auto; min-width: 0; text-align: left; font-size: 15px; padding: 9px 11px;
+  border: 1px solid rgba(255, 255, 255, .14); border-radius: 10px;
+  background: rgba(255, 255, 255, .06); color: #f2f5f9;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.tap-toggle { display: flex; align-items: center; gap: 5px; margin: 2px 0 9px; }
+.tap-toggle-label { font-size: 12px; color: #8fa1b5; }
+.toggle-btn {
+  font-size: 12px; padding: 6px 11px; border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .18); background: transparent; color: #c8d6e5;
+}
+.toggle-btn.active { background: #f2f5f9; color: #0b0e14; border-color: #f2f5f9; font-weight: 700; }
+.action-row { display: flex; gap: 8px; }
+.primary-btn {
+  flex: 1 1 auto; font-size: 15px; font-weight: 700; padding: 11px 10px; border: none;
+  border-radius: 11px; background: #1f6feb; color: #fff;
+}
+.primary-btn:disabled { background: #33507c; color: #9db8dd; }
+.sub-btn {
+  flex: 0 0 auto; font-size: 14px; font-weight: 700; padding: 11px 13px;
+  border-radius: 11px; border: 1px solid rgba(255, 180, 84, .55);
+  background: rgba(255, 180, 84, .13); color: #ffb454;
+}
+.sub-btn:disabled { opacity: .45; }
+
+.flow-area { overflow-y: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; }
+.flow-hint { font-size: 13px; color: #9fb0c3; line-height: 1.6; }
+.flow-title { font-size: 14px; font-weight: 700; margin-bottom: 8px; line-height: 1.5; }
+.flow-title .sub { display: block; font-size: 12px; font-weight: 400; color: #8fa1b5; margin-top: 2px; }
+.progress-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.progress-note { font-size: 12px; color: #9fb0c3; line-height: 1.6; margin-bottom: 10px; }
+
+.pick-row {
+  display: flex; align-items: center; gap: 8px; width: 100%; text-align: left;
+  border: 1px solid rgba(255, 255, 255, .13); border-radius: 11px;
+  padding: 10px 11px; margin-bottom: 7px; background: rgba(255, 255, 255, .05);
+  color: #f2f5f9; font-size: 15px;
+}
+.pick-row:active { background: rgba(88, 166, 255, .18); }
+.pick-main { flex: 1 1 auto; min-width: 0; font-weight: 600; line-height: 1.4; }
+.pick-main small { display: block; font-size: 11px; font-weight: 400; color: #8fa1b5; }
+.pick-side { flex: 0 0 auto; text-align: right; font-size: 12px; color: #9fb0c3; line-height: 1.5; }
+.pick-side .t { font-size: 15px; font-weight: 700; color: #f2f5f9; }
+.tag-computed {
+  display: inline-block; font-size: 10px; font-weight: 700; color: #0b0e14;
+  background: #58a6ff; border-radius: 5px; padding: 0 5px; margin-left: 6px; vertical-align: 2px;
+}
+.badge-caution {
+  display: inline-block; font-size: 11px; font-weight: 700; color: #ffd479;
+  background: rgba(255, 190, 60, .18); border-radius: 6px; padding: 1px 6px;
+  margin-left: 6px; vertical-align: 2px;
+}
+.route-summary {
+  font-size: 14px; line-height: 1.65; background: rgba(88, 166, 255, .12);
+  border: 1px solid rgba(88, 166, 255, .35); border-radius: 11px;
+  padding: 10px 12px; margin-bottom: 9px;
+}
+.route-summary.surface { background: rgba(255, 180, 84, .10); border-color: rgba(255, 180, 84, .4); }
+.route-summary .big { font-size: 17px; font-weight: 700; }
+.note-line { font-size: 11px; color: #8fa1b5; margin-top: 5px; }
+.flow-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.flow-actions .mini-btn { flex: 1 1 auto; padding: 9px 11px; }
+.flow-msg { font-size: 13px; line-height: 1.65; color: #e8eef5; margin-bottom: 9px; }
+
+.sheet.error { background: rgba(60, 18, 16, .88); color: #ffd9d4; font-size: 14px; line-height: 1.6; }
 .sheet.error .mini-btn { margin-top: 10px; }
 
-.placeholder { background: #f5f7f9; overflow-y: auto; }
+/* ---------- プレースホルダ画面（マイルート/設定） ---------- */
+.placeholder { background: #0b0e14; overflow-y: auto; }
 .placeholder-inner { padding: 28px 20px; }
 .placeholder-inner h1 { font-size: 20px; margin: 0 0 12px; }
-.placeholder-inner p { font-size: 14px; color: #43505e; line-height: 1.7; }
+.placeholder-inner p { font-size: 14px; color: #9fb0c3; line-height: 1.7; }
 .info-list { font-size: 13px; line-height: 1.7; }
 .info-list dt { font-weight: 700; margin-top: 10px; }
-.info-list dd { margin: 2px 0 0; color: #43505e; }
-.mono { font-family: ui-monospace, Menlo, monospace; font-size: 11px; word-break: break-all; }
+.info-list dd { margin: 2px 0 0; color: #9fb0c3; }
+.setting-block { margin-top: 22px; }
+.setting-block label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+.setting-block input {
+  width: 100%; font-size: 13px; padding: 9px 10px; margin-bottom: 8px;
+  border: 1px solid rgba(255, 255, 255, .2); border-radius: 9px;
+  background: rgba(255, 255, 255, .07); color: #f2f5f9;
+  font-family: ui-monospace, Menlo, monospace;
+}
+.setting-note { font-size: 12px; color: #68798e; }
 
+/* ---------- 下部タブバー ---------- */
 #tabbar {
   position: fixed; left: 0; right: 0; bottom: 0; height: 56px; z-index: 2000;
-  display: flex; background: rgba(255,255,255,.97);
-  border-top: 1px solid #dde4ec; padding-bottom: env(safe-area-inset-bottom);
+  display: flex; background: rgba(11, 14, 20, .88);
+  -webkit-backdrop-filter: blur(12px) saturate(1.25);
+  backdrop-filter: blur(12px) saturate(1.25);
+  border-top: 1px solid rgba(255, 255, 255, .12);
+  padding-bottom: env(safe-area-inset-bottom);
 }
 #tabbar .tab {
   flex: 1; border: none; background: none; font-size: 14px; font-weight: 600;
-  color: #68727f;
+  color: #8fa1b5;
 }
-#tabbar .tab.active { color: #1f6feb; }
+#tabbar .tab.active { color: #58a6ff; }
 
+/* ---------- 地図まわり ---------- */
 .pin-icon { background: none; border: none; }
 .pin-dot {
   width: 22px; height: 22px; border-radius: 50%; border: 3px solid #fff;
-  box-shadow: 0 1px 6px rgba(0,0,0,.4); margin: -2px 0 0 -2px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, .5); margin: -2px 0 0 -2px;
 }
-.pin-dot.from { background: #2e7d4f; }
-.pin-dot.to { background: #c0392b; }
+.pin-dot.from { background: #3fb96f; }
+.pin-dot.to { background: #e5534b; }
+.leaflet-bar a {
+  background: rgba(13, 17, 26, .85); color: #f2f5f9;
+  border-bottom: 1px solid rgba(255, 255, 255, .14);
+}
+.leaflet-control-attribution {
+  background: rgba(11, 14, 20, .55) !important; color: #68798e !important; font-size: 9px !important;
+}
+.leaflet-control-attribution a { color: #68798e !important; }
+.leaflet-top.leaflet-right { top: 132px; }
